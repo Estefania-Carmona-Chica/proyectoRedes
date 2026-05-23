@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sistema de Riego Inteligente</title>
     <!-- Importar tipografía premium Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -197,6 +197,12 @@
             margin-bottom: 15px;
         }
 
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 240px;
+        }
+
         /* --- Tablas Responsivas --- */
         .table-responsive {
             width: 100%;
@@ -280,7 +286,7 @@
             border-radius: 8px;
             outline: none;
             font-family: inherit;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         .admin-form input:focus {
@@ -502,7 +508,9 @@
 
         <div class="chart-box">
             <h2>📈 Gráfica de Humedad (Tiempo Real)</h2>
-            <canvas id="humedadChart"></canvas>
+            <div class="chart-container">
+                <canvas id="humedadChart"></canvas>
+            </div>
         </div>
 
         <div class="table-responsive">

@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Login - Sistema de Riego</title>
     <!-- Importar tipografía premium Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,7 +22,7 @@
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 16px;
         }
 
         .login-box {
@@ -32,7 +32,7 @@
             border-radius: 16px;
             box-shadow: 0 10px 25px rgba(45, 106, 45, 0.15);
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
             border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
@@ -41,30 +41,30 @@
             text-align: center;
             margin-top: 0;
             margin-bottom: 8px;
-            font-size: 26px;
+            font-size: 28px;
             font-weight: 700;
         }
 
         .subtitle {
             color: #666;
             text-align: center;
-            font-size: 14px;
-            margin-bottom: 30px;
+            font-size: 15px;
+            margin-bottom: 32px;
             font-weight: 400;
         }
 
         .input-group {
             position: relative;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
 
         input {
             width: 100%;
-            padding: 12px 16px;
+            padding: 14px 18px;
             border: 1.5px solid #d0dbd0;
-            border-radius: 8px;
+            border-radius: 10px;
             font-family: inherit;
-            font-size: 15px;
+            font-size: 16px; /* Evita zoom automático en Safari */
             background-color: #fafdfa;
             color: #333;
             outline: none;
@@ -78,11 +78,11 @@
 
         button {
             width: 100%;
-            padding: 14px;
+            padding: 15px;
             background: linear-gradient(135deg, #2d6a2d 0%, #1e4d1e 100%);
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
@@ -103,11 +103,11 @@
             background-color: #ffebee;
             color: #c62828;
             border: 1px solid #ffcdd2;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 10px;
             text-align: center;
             margin-top: 20px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -118,11 +118,24 @@
         /* Responsive */
         @media (max-width: 480px) {
             .login-box {
-                padding: 30px 20px;
-                border-radius: 12px;
+                padding: 35px 24px;
+                border-radius: 16px;
+                box-shadow: 0 6px 15px rgba(45, 106, 45, 0.1);
             }
             h2 {
-                font-size: 22px;
+                font-size: 24px;
+            }
+            .subtitle {
+                font-size: 14px;
+                margin-bottom: 24px;
+            }
+            input {
+                padding: 14px 16px;
+                font-size: 16px;
+            }
+            button {
+                padding: 15px;
+                font-size: 16px;
             }
         }
     </style>
