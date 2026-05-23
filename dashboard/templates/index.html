@@ -4,201 +4,330 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Riego Inteligente</title>
+    <!-- Importar tipografía premium Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f4f0;
-            margin: 0;
-            padding: 20px;
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #e6f7f0;
+            --bg-main: #f3f7f4;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --card-bg: #ffffff;
+            --danger: #ef4444;
+            --danger-bg: #fee2e2;
+            --success-bg: #d1fae5;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 4px 12px rgba(45, 106, 45, 0.08);
+            --shadow-lg: 0 10px 25px rgba(45, 106, 45, 0.12);
         }
 
-        h1 {
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #f0f7f3 0%, var(--bg-main) 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* --- Estilo de la Cabecera (Header) --- */
+        .navbar {
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid #e2ebd5;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-logo span {
+            font-size: 24px;
+        }
+
+        .navbar-logo h1 {
+            font-size: 20px;
+            font-weight: 700;
             color: #2d6a2d;
-            text-align: center;
-            margin-bottom: 10px;
+            margin: 0;
         }
 
         .logout {
-            float: right;
-            background: #e74c3c;
+            background: #ef4444;
             color: white;
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 8px 18px;
+            border-radius: 8px;
             text-decoration: none;
-            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(239, 68, 68, 0.2);
         }
 
+        .logout:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+        }
+
+        /* --- Contenedor Principal --- */
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- Alerta --- */
+        .alerta {
+            background: var(--danger-bg);
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 100%;
+            margin: 15px 0 25px;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: var(--shadow-md);
+            display: none;
+            animation: pulse-danger 2s infinite;
+        }
+
+        @keyframes pulse-danger {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* --- Grid de Tarjetas (Cards) --- */
         .cards {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 20px 0;
+            margin-bottom: 30px;
         }
 
         .card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            width: 170px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px 20px;
             text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(226, 235, 213, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
         }
 
         .card h3 {
-            color: #666;
+            color: var(--text-muted);
             font-size: 13px;
-            margin: 0 0 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin: 0 0 12px;
         }
 
         .card .valor {
-            font-size: 30px;
-            font-weight: bold;
+            font-size: 36px;
+            font-weight: 800;
             color: #2d6a2d;
         }
 
+        /* Indicadores de Bomba */
         .bomba-on {
-            color: #e74c3c !important;
+            color: #ef4444 !important;
+            text-shadow: 0 0 12px rgba(239, 68, 68, 0.15);
         }
 
         .bomba-off {
-            color: #2d6a2d !important;
+            color: #10b981 !important;
+            text-shadow: 0 0 12px rgba(16, 185, 129, 0.15);
         }
 
-        .alerta {
-            background: #ffe0e0;
-            color: #c0392b;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            max-width: 1000px;
-            margin: 10px auto;
-            display: none;
-            font-weight: bold;
-        }
-
+        /* --- Sección Gráfica --- */
         .chart-box {
-            width: 90%;
-            max-width: 1000px;
-            margin: 20px auto;
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(226, 235, 213, 0.5);
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .chart-box h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2d6a2d;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        /* --- Tablas Responsivas --- */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(226, 235, 213, 0.5);
+            margin-bottom: 35px;
+            /* Soporte de scroll táctil suave en iOS */
+            -webkit-overflow-scrolling: touch;
         }
 
         table {
             width: 100%;
-            max-width: 1000px;
-            margin: 20px auto;
             border-collapse: collapse;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 14px;
+            text-align: left;
         }
 
         th {
             background: #2d6a2d;
             color: white;
-            padding: 12px;
+            padding: 16px 20px;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         td {
-            padding: 10px;
-            text-align: center;
-            border-bottom: 1px solid #eee;
+            padding: 14px 20px;
+            border-bottom: 1px solid #f0f4f0;
+            color: var(--text-main);
         }
 
-        @media (max-width: 700px) {
-            .card {
-                width: 100%;
-            }
+        tr:last-child td {
+            border-bottom: none;
+        }
 
-            .logout {
-                float: none;
-                display: inline-block;
-                margin-bottom: 15px;
-            }
+        tr:hover td {
+            background-color: #f9fbf9;
         }
 
         /* --- Panel de Administración --- */
         .admin-container {
-            max-width: 1000px;
-            margin: 30px auto;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 25px;
+            margin-top: 30px;
         }
 
         .admin-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(226, 235, 213, 0.5);
         }
 
         .admin-card h2 {
             color: #2d6a2d;
             font-size: 20px;
+            font-weight: 700;
             margin-top: 0;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #f0f4f0;
-            padding-bottom: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #f0f7f3;
+            padding-bottom: 12px;
         }
 
         .admin-form {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 25px;
         }
 
         .admin-form input {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
+            padding: 12px 14px;
+            border: 1.5px solid #d0dbd0;
+            border-radius: 8px;
+            outline: none;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .admin-form input:focus {
+            border-color: #2d6a2d;
+            box-shadow: 0 0 0 3px rgba(45, 106, 45, 0.1);
         }
 
         .admin-form button {
-            padding: 10px;
-            background: #2d6a2d;
+            padding: 12px;
+            background: linear-gradient(135deg, #2d6a2d 0%, #1e4d1e 100%);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 10px rgba(45, 106, 45, 0.15);
         }
 
         .admin-form button:hover {
-            background: #1e4d1e;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(45, 106, 45, 0.25);
         }
 
         .admin-table {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
         }
 
         .admin-table th {
-            background: #f0f4f0;
+            background: #f0f7f3;
             color: #2d6a2d;
-            padding: 8px;
-            text-align: left;
+            padding: 10px 14px;
+            font-size: 12px;
         }
 
         .admin-table td {
-            padding: 8px;
-            border-bottom: 1px solid #eee;
+            padding: 10px 14px;
+            font-size: 13px;
         }
 
+        /* Badges de Roles */
         .badge {
             padding: 4px 8px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 11px;
-            font-weight: bold;
+            font-weight: 700;
+            text-transform: uppercase;
         }
 
         .badge-admin {
@@ -211,164 +340,252 @@
             color: #0d47a1;
         }
 
+        /* Botón de Activación de Llaves */
         .btn-toggle {
-            padding: 4px 8px;
+            padding: 6px 12px;
             font-size: 11px;
-            border-radius: 4px;
+            border-radius: 6px;
             border: none;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 700;
+            text-transform: uppercase;
         }
 
         .btn-active {
-            background: #ffebee;
-            color: #c62828;
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn-active:hover {
+            background: #fca5a5;
         }
 
         .btn-inactive {
-            background: #e8f5e9;
-            color: #2e7d32;
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .btn-inactive:hover {
+            background: #a7f3d0;
         }
 
         /* API Key Callout */
         .api-callout {
-            background: #e8f5e9;
-            border-left: 4px solid #2e7d32;
-            padding: 15px;
-            border-radius: 6px;
+            background: #e6f7f0;
+            border-left: 4px solid #10b981;
+            padding: 16px;
+            border-radius: 8px;
             margin-top: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: none;
+        }
+
+        .api-callout strong {
+            color: #059669;
+            font-size: 14px;
+        }
+
+        .api-callout p {
+            margin: 5px 0 10px;
+            font-size: 12px;
+            color: var(--text-muted);
         }
 
         .api-callout code {
             display: block;
             background: white;
-            padding: 10px;
-            border: 1px solid #c8e6c9;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 14px;
+            padding: 12px;
+            border: 1px solid #a7f3d0;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
             margin-top: 5px;
             word-break: break-all;
+            color: #2d6a2d;
         }
 
-        @media (max-width: 900px) {
+        /* --- Media Queries Responsivas --- */
+        @media (max-width: 960px) {
             .admin-container {
                 grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding-bottom: 20px;
+            }
+
+            .navbar-container {
+                padding: 12px 16px;
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+
+            .navbar-logo {
+                justify-content: center;
+            }
+
+            .logout {
+                width: 100%;
+                justify-content: center;
+                padding: 10px;
+            }
+
+            .main-content {
+                padding: 15px 12px;
+            }
+
+            .card {
+                padding: 20px 15px;
+            }
+
+            .card .valor {
+                font-size: 32px;
+            }
+
+            .chart-box {
+                padding: 15px;
+            }
+            
+            th, td {
+                padding: 12px 14px;
             }
         }
     </style>
 </head>
 <body>
-    <a href="/logout" class="logout">Cerrar sesión</a>
-
-    <h1>Sistema Inteligente de Riego</h1>
-
-    <div id="alerta" class="alerta">
-        ALERTA: Humedad crítica - Riego activado automáticamente
-    </div>
-
-    <div class="cards">
-        <div class="card">
-            <h3>Cultivo</h3>
-            <div class="valor" id="cultivo">--</div>
-        </div>
-
-        <div class="card">
-            <h3>Humedad %</h3>
-            <div class="valor" id="humedad">--</div>
-        </div>
-
-        <div class="card">
-            <h3>Luz</h3>
-            <div class="valor" id="luz">--</div>
-        </div>
-
-        <div class="card">
-            <h3>Bomba</h3>
-            <div class="valor" id="bomba">--</div>
-        </div>
-    </div>
-
-    <div class="chart-box">
-        <canvas id="humedadChart"></canvas>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Timestamp</th>
-                <th>Cultivo</th>
-                <th>Humedad %</th>
-                <th>Luz</th>
-                <th>Bomba</th>
-            </tr>
-        </thead>
-        <tbody id="tabla"></tbody>
-    </table>
-
-    {% if role == 'admin' %}
-    <div class="admin-container">
-        <!-- Panel Gestión Usuarios -->
-        <div class="admin-card">
-            <h2>👥 Gestión de Usuarios</h2>
-            
-            <form id="form-usuario" class="admin-form">
-                <input type="text" id="usr-username" placeholder="Nombre de usuario" required>
-                <input type="password" id="usr-password" placeholder="Contraseña segura" required>
-                <button type="submit">Crear Usuario Estándar</button>
-            </form>
-            
-            <div id="usr-msg" style="color: green; font-weight: bold; margin-bottom: 10px; font-size: 13px;"></div>
-            <div id="usr-err" style="color: red; font-weight: bold; margin-bottom: 10px; font-size: 13px;"></div>
-
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Rol</th>
-                    </tr>
-                </thead>
-                <tbody id="admin-tabla-usuarios">
-                    <!-- Cargar dinámicamente -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Panel Gestión API Keys -->
-        <div class="admin-card">
-            <h2>🔑 Integración de Terceros (API Keys)</h2>
-            
-            <form id="form-api" class="admin-form">
-                <input type="text" id="api-client" placeholder="Nombre del cliente (ej. Riego Automatizado)" required>
-                <button type="submit">Generar Nueva API Key</button>
-            </form>
-
-            <div id="api-callout" class="api-callout">
-                <strong>¡API Key creada con éxito!</strong>
-                <p>Copia esta llave ahora. Por seguridad, no se volverá a mostrar en pantalla:</p>
-                <code id="api-key-code"></code>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-logo">
+                <span>🌱</span>
+                <h1>Sistema de Riego Inteligente</h1>
             </div>
-            
-            <div id="api-err" style="color: red; font-weight: bold; margin-bottom: 10px; font-size: 13px;"></div>
+            <a href="/logout" class="logout">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0v2z"/>
+                    <path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z"/>
+                </svg>
+                Cerrar sesión
+            </a>
+        </div>
+    </nav>
 
-            <table class="admin-table">
+    <div class="main-content">
+        <div id="alerta" class="alerta">
+            ⚠️ ALERTA: Humedad crítica - Riego activado automáticamente
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Cultivo</h3>
+                <div class="valor" id="cultivo">--</div>
+            </div>
+
+            <div class="card">
+                <h3>Humedad %</h3>
+                <div class="valor" id="humedad">--</div>
+            </div>
+
+            <div class="card">
+                <h3>Luz</h3>
+                <div class="valor" id="luz">--</div>
+            </div>
+
+            <div class="card">
+                <h3>Bomba</h3>
+                <div class="valor" id="bomba">--</div>
+            </div>
+        </div>
+
+        <div class="chart-box">
+            <h2>📈 Gráfica de Humedad (Tiempo Real)</h2>
+            <canvas id="humedadChart"></canvas>
+        </div>
+
+        <div class="table-responsive">
+            <table>
                 <thead>
                     <tr>
-                        <th>Cliente</th>
-                        <th>Creado el</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
+                        <th>Timestamp</th>
+                        <th>Cultivo</th>
+                        <th>Humedad %</th>
+                        <th>Luz</th>
+                        <th>Bomba</th>
                     </tr>
                 </thead>
-                <tbody id="admin-tabla-keys">
-                    <!-- Cargar dinámicamente -->
-                </tbody>
+                <tbody id="tabla"></tbody>
             </table>
         </div>
+
+        {% if role == 'admin' %}
+        <div class="admin-container">
+            <!-- Panel Gestión Usuarios -->
+            <div class="admin-card">
+                <h2>👥 Gestión de Usuarios</h2>
+                
+                <form id="form-usuario" class="admin-form">
+                    <input type="text" id="usr-username" placeholder="Nombre de usuario" required>
+                    <input type="password" id="usr-password" placeholder="Contraseña segura" required>
+                    <button type="submit">Crear Usuario Estándar</button>
+                </form>
+                
+                <div id="usr-msg" style="color: #059669; font-weight: bold; margin-bottom: 12px; font-size: 13px;"></div>
+                <div id="usr-err" style="color: #dc2626; font-weight: bold; margin-bottom: 12px; font-size: 13px;"></div>
+
+                <div class="table-responsive" style="margin-bottom: 0; box-shadow: none; border-radius: 8px;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Rol</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-tabla-usuarios">
+                            <!-- Cargar dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Panel Gestión API Keys -->
+            <div class="admin-card">
+                <h2>🔑 Integración de Terceros (API Keys)</h2>
+                
+                <form id="form-api" class="admin-form">
+                    <input type="text" id="api-client" placeholder="Nombre del cliente (ej. Riego Automatizado)" required>
+                    <button type="submit">Generar Nueva API Key</button>
+                </form>
+
+                <div id="api-callout" class="api-callout">
+                    <strong>¡API Key creada con éxito!</strong>
+                    <p>Copia esta llave ahora. Por seguridad, no se volverá a mostrar en pantalla:</p>
+                    <code id="api-key-code"></code>
+                </div>
+                
+                <div id="api-err" style="color: #dc2626; font-weight: bold; margin-bottom: 12px; font-size: 13px;"></div>
+
+                <div class="table-responsive" style="margin-bottom: 0; box-shadow: none; border-radius: 8px;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Creado el</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-tabla-keys">
+                            <!-- Cargar dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 
     <script>
         function convertirHumedad(raw) {
@@ -388,12 +605,16 @@
                 datasets: [{
                     label: 'Humedad %',
                     data: [],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.05)',
                     borderWidth: 2,
-                    tension: 0.3
+                    tension: 0.3,
+                    fill: true
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 animation: false,
                 scales: {
                     y: {
@@ -403,6 +624,18 @@
                 }
             }
         });
+
+        // Configuración de altura adaptable de la gráfica
+        function setChartHeight() {
+            const chartParent = ctx.parentNode;
+            if (window.innerWidth < 640) {
+                chartParent.style.height = '240px';
+            } else {
+                chartParent.style.height = '350px';
+            }
+        }
+        setChartHeight();
+        window.addEventListener('resize', setChartHeight);
 
         function actualizarGrafica(datos) {
             const datosOrdenados = [...datos].reverse();
@@ -436,7 +669,7 @@
                         '<td>' + d.cultivo + '</td>' +
                         '<td>' + humedadFila + '%</td>' +
                         '<td>' + (d.luz == 0 ? 'Día' : 'Noche') + '</td>' +
-                        '<td style="color:' + (d.bomba ? '#e74c3c' : '#2d6a2d') + '; font-weight:bold;">' +
+                        '<td style="color:' + (d.bomba ? '#ef4444' : '#10b981') + '; font-weight:bold;">' +
                             (d.bomba ? 'ON' : 'OFF') +
                         '</td>' +
                     '</tr>'
@@ -487,7 +720,7 @@
                                 <td>${k.client_name}</td>
                                 <td>${k.created_at}</td>
                                 <td>
-                                    <span style="color: ${k.active ? '#2e7d32' : '#c62828'}; font-weight: bold;">
+                                    <span style="color: ${k.active ? '#10b981' : '#dc2626'}; font-weight: bold;">
                                         ${k.active ? 'Activa' : 'Inactiva'}
                                     </span>
                                 </td>
