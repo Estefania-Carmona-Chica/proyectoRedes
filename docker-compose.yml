@@ -1,0 +1,75 @@
+services:
+  database:
+    image: postgres:15
+    container_name: database
+    env_file:
+      - .env
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - iot-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  broker:
+    image: eclipse-mosquitto:latest
+    container_name: broker
+    restart: always
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+    volumes:
+      - ./broker/config:/mosquitto/config
+      - ./broker/data:/mosquitto/data
+      - ./broker/log:/mosquitto/log
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - iot-net
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: mqtt-client:dev
+    container_name: client
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - ./client/src:/app
+    entrypoint: ["python"]
+    command: ["client.py"]
+    depends_on:
+      - broker
+    networks:
+      - iot-net
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    image: dashboard:dev
+    container_name: dashboard
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:5000:5000"  # <--- CAMBIADO: Mapea el puerto 5000 interno de forma segura para Nginx
+    depends_on:
+      - database
+    networks:
+      - iot-net
+
+networks:
+  iot-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+    name: project_2025_ii_pgdata

@@ -1,0 +1,6 @@
+flask 
+psycopg2-binary
+paho-mqtt
+python-dotenv
+PyJWT
+Flask-Limiter

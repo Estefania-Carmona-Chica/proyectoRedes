@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Riego Inteligente</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2d6a2d;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .logout {
+            float: right;
+            background: #e74c3c;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-bottom: 10px;
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            width: 170px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: #666;
+            font-size: 13px;
+            margin: 0 0 10px;
+        }
+
+        .card .valor {
+            font-size: 30px;
+            font-weight: bold;
+            color: #2d6a2d;
+        }
+
+        .bomba-on {
+            color: #e74c3c !important;
+        }
+
+        .bomba-off {
+            color: #2d6a2d !important;
+        }
+
+        .alerta {
+            background: #ffe0e0;
+            color: #c0392b;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 1000px;
+            margin: 10px auto;
+            display: none;
+            font-weight: bold;
+        }
+
+        .chart-box {
+            width: 90%;
+            max-width: 1000px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            max-width: 1000px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th {
+            background: #2d6a2d;
+            color: white;
+            padding: 12px;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        @media (max-width: 700px) {
+            .card {
+                width: 100%;
+            }
+
+            .logout {
+                float: none;
+                display: inline-block;
+                margin-bottom: 15px;
+            }
+        }
+
+        /* --- Panel de Administración --- */
+        .admin-container {
+            max-width: 1000px;
+            margin: 30px auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .admin-card h2 {
+            color: #2d6a2d;
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f4f0;
+            padding-bottom: 10px;
+        }
+
+        .admin-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .admin-form input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .admin-form button {
+            padding: 10px;
+            background: #2d6a2d;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .admin-form button:hover {
+            background: #1e4d1e;
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .admin-table th {
+            background: #f0f4f0;
+            color: #2d6a2d;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .admin-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .badge-admin {
+            background: #ffe0b2;
+            color: #e65100;
+        }
+
+        .badge-user {
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .btn-toggle {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-active {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .btn-inactive {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        /* API Key Callout */
+        .api-callout {
+            background: #e8f5e9;
+            border-left: 4px solid #2e7d32;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .api-callout code {
+            display: block;
+            background: white;
+            padding: 10px;
+            border: 1px solid #c8e6c9;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        @media (max-width: 900px) {
+            .admin-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="/logout" class="logout">Cerrar sesión</a>
+
+    <h1>Sistema Inteligente de Riego</h1>
+
+    <div id="alerta" class="alerta">
+        ALERTA: Humedad crítica - Riego activado automáticamente
+    </div>
+
+    <div class="cards">
+        <div class="card">
+            <h3>Cultivo</h3>
+            <div class="valor" id="cultivo">--</div>
+        </div>
+
+        <div class="card">
+            <h3>Humedad %</h3>
+            <div class="valor" id="humedad">--</div>
+        </div>
+
+        <div class="card">
+            <h3>Luz</h3>
+            <div class="valor" id="luz">--</div>
+        </div>
+
+        <div class="card">
+            <h3>Bomba</h3>
+            <div class="valor" id="bomba">--</div>
+        </div>
+    </div>
+
+    <div class="chart-box">
+        <canvas id="humedadChart"></canvas>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Cultivo</th>
+                <th>Humedad %</th>
+                <th>Luz</th>
+                <th>Bomba</th>
+            </tr>
+        </thead>
+        <tbody id="tabla"></tbody>
+    </table>
+
+    {% if role == 'admin' %}
+    <div class="admin-container">
+        <!-- Panel Gestión Usuarios -->
+        <div class="admin-card">
+            <h2>👥 Gestión de Usuarios</h2>
+            
+            <form id="form-usuario" class="admin-form">
+                <input type="text" id="usr-username" placeholder="Nombre de usuario" required>
+                <input type="password" id="usr-password" placeholder="Contraseña segura" required>
+                <button type="submit">Crear Usuario Estándar</button>
+            </form>
+            
+            <div id="usr-msg" style="color: green; font-weight: bold; margin-bottom: 10px; font-size: 13px;"></div>
+            <div id="usr-err" style="color: red; font-weight: bold; margin-bottom: 10px; font-size: 13px;"></div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Rol</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-tabla-usuarios">
+                    <!-- Cargar dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Panel Gestión API Keys -->
+        <div class="admin-card">
+            <h2>🔑 Integración de Terceros (API Keys)</h2>
+            
+            <form id="form-api" class="admin-form">
+                <input type="text" id="api-client" placeholder="Nombre del cliente (ej. Riego Automatizado)" required>
+                <button type="submit">Generar Nueva API Key</button>
+            </form>
+
+            <div id="api-callout" class="api-callout">
+                <strong>¡API Key creada con éxito!</strong>
+                <p>Copia esta llave ahora. Por seguridad, no se volverá a mostrar en pantalla:</p>
+                <code id="api-key-code"></code>
+            </div>
+            
+            <div id="api-err" style="color: red; font-weight: bold; margin-bottom: 10px; font-size: 13px;"></div>
+
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Creado el</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-tabla-keys">
+                    <!-- Cargar dinámicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        function convertirHumedad(raw) {
+            const valor = Number(raw);
+            if (Number.isNaN(valor)) return 0;
+
+            const porcentaje = Math.round((4095 - valor) / 4095 * 100);
+            return Math.max(0, Math.min(100, porcentaje));
+        }
+
+        const ctx = document.getElementById('humedadChart');
+
+        const humedadChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Humedad %',
+                    data: [],
+                    borderWidth: 2,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        function actualizarGrafica(datos) {
+            const datosOrdenados = [...datos].reverse();
+
+            humedadChart.data.labels = datosOrdenados.map(d => d.ts);
+            humedadChart.data.datasets[0].data = datosOrdenados.map(d => convertirHumedad(d.humedad));
+            humedadChart.update();
+        }
+
+        function actualizarVista(datos) {
+            if (!datos.length) return;
+
+            const u = datos[0];
+            const humedadActual = convertirHumedad(u.humedad);
+
+            document.getElementById('cultivo').textContent = u.cultivo || 'Tomate';
+            document.getElementById('humedad').textContent = humedadActual + '%';
+            document.getElementById('luz').textContent = u.luz == 0 ? 'Día' : 'Noche';
+
+            const b = document.getElementById('bomba');
+            b.textContent = u.bomba ? 'ON' : 'OFF';
+            b.className = u.bomba ? 'valor bomba-on' : 'valor bomba-off';
+
+            document.getElementById('alerta').style.display = humedadActual < 55 ? 'block' : 'none';
+
+            document.getElementById('tabla').innerHTML = datos.map(d => {
+                const humedadFila = convertirHumedad(d.humedad);
+                return (
+                    '<tr>' +
+                        '<td>' + d.ts + '</td>' +
+                        '<td>' + d.cultivo + '</td>' +
+                        '<td>' + humedadFila + '%</td>' +
+                        '<td>' + (d.luz == 0 ? 'Día' : 'Noche') + '</td>' +
+                        '<td style="color:' + (d.bomba ? '#e74c3c' : '#2d6a2d') + '; font-weight:bold;">' +
+                            (d.bomba ? 'ON' : 'OFF') +
+                        '</td>' +
+                    '</tr>'
+                );
+            }).join('');
+
+            actualizarGrafica(datos);
+        }
+
+        async function actualizar() {
+            try {
+                const response = await fetch('/api/datos');
+                const datos = await response.json();
+
+                if (Array.isArray(datos) && datos.length > 0) {
+                    actualizarVista(datos);
+                }
+            } catch (error) {
+                console.error('Error al cargar datos:', error);
+            }
+        }
+
+        actualizar();
+        setInterval(actualizar, 3000);
+
+        // Lógica de administración (solo ejecutada para rol admin)
+        const userRole = "{{ role }}";
+        if (userRole === "admin") {
+            async function cargarDatosAdmin() {
+                try {
+                    const response = await fetch('/admin/data');
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                        // Renderizar Usuarios
+                        const usrTabla = document.getElementById('admin-tabla-usuarios');
+                        usrTabla.innerHTML = data.usuarios.map(u => `
+                            <tr>
+                                <td><strong>${u.username}</strong></td>
+                                <td><span class="badge badge-${u.role}">${u.role.toUpperCase()}</span></td>
+                            </tr>
+                        `).join('');
+
+                        // Renderizar API Keys
+                        const keysTabla = document.getElementById('admin-tabla-keys');
+                        keysTabla.innerHTML = data.api_keys.map(k => `
+                            <tr>
+                                <td>${k.client_name}</td>
+                                <td>${k.created_at}</td>
+                                <td>
+                                    <span style="color: ${k.active ? '#2e7d32' : '#c62828'}; font-weight: bold;">
+                                        ${k.active ? 'Activa' : 'Inactiva'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn-toggle btn-${k.active ? 'active' : 'inactive'}" onclick="toggleApiKey(${k.id})">
+                                        ${k.active ? 'Desactivar' : 'Activar'}
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+                    }
+                } catch (error) {
+                    console.error("Error al cargar datos de admin:", error);
+                }
+            }
+
+            // Registrar Usuario
+            document.getElementById('form-usuario').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const usernameEl = document.getElementById('usr-username');
+                const passwordEl = document.getElementById('usr-password');
+                const msgEl = document.getElementById('usr-msg');
+                const errEl = document.getElementById('usr-err');
+
+                msgEl.textContent = '';
+                errEl.textContent = '';
+
+                try {
+                    const response = await fetch('/admin/crear-usuario', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            username: usernameEl.value,
+                            password: passwordEl.value
+                        })
+                    });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        msgEl.textContent = data.message;
+                        usernameEl.value = '';
+                        passwordEl.value = '';
+                        cargarDatosAdmin();
+                    } else {
+                        errEl.textContent = data.error || 'Error al crear usuario.';
+                    }
+                } catch (error) {
+                    errEl.textContent = 'Error de conexión.';
+                }
+            });
+
+            // Registrar API Key
+            document.getElementById('form-api').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const clientEl = document.getElementById('api-client');
+                const calloutEl = document.getElementById('api-callout');
+                const codeEl = document.getElementById('api-key-code');
+                const errEl = document.getElementById('api-err');
+
+                errEl.textContent = '';
+                calloutEl.style.display = 'none';
+
+                try {
+                    const response = await fetch('/admin/crear-api-key', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ client_name: clientEl.value })
+                    });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        codeEl.textContent = data.api_key;
+                        calloutEl.style.display = 'block';
+                        clientEl.value = '';
+                        cargarDatosAdmin();
+                    } else {
+                        errEl.textContent = data.error || 'Error al crear API Key.';
+                    }
+                } catch (error) {
+                    errEl.textContent = 'Error de conexión.';
+                }
+            });
+
+            // Alternar API Key
+            window.toggleApiKey = async function(id) {
+                try {
+                    const response = await fetch('/admin/toggle-api-key', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: id })
+                    });
+                    if (response.ok) {
+                        cargarDatosAdmin();
+                    }
+                } catch (error) {
+                    console.error("Error al alternar API Key:", error);
+                }
+            };
+
+            // Carga inicial de datos administrativos
+            cargarDatosAdmin();
+        }
+    </script>
+</body>
+</html>

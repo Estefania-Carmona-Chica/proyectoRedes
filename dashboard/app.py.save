@@ -1,0 +1,53 @@
+from flask import Flask, render_template, jsonify, request, redirect, url_for, session
+import psycopg2
+import os
+
+app = Flask(__name__)
+app.secret_key = 'riego_secreto_2025'
+USUARIO = 'admin'
+PASSWORD = 'Tefa_2026!Secure'
+
+def get_db():
+    return psycopg2.connect(
+        host=os.getenv('PG_HOST'),
+        port=int(os.getenv('PG_PORT')),
+        dbname=os.getenv('PG_DB'),
+        user=os.getenv('PG_USER'),
+        password=os.getenv('PG_PASSWORD')
+    )
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        if request.form['usuario'] == USUARIO and request.form['password'] == PASSWORD:
+            session['logged_in'] = True
+            return redirect(url_for('index'))
+        else:
+            error = 'Usuario o contrasena incorrectos'
+    return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    return redirect(url_for('login'))
+
+@app.route('/')
+def index():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('index.html')
+
+@app.route('/api/datos')
+def datos():
+    if not session.get('logged_in'):
+        return jsonify({'error': 'No autorizado'}), 401
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute('SELECT ts, cultivo, humedad, luz, bomba FROM sensors ORDER BY ts DESC LIMIT 20;')
+    rows = cur.fetchall()
+    conn.close()
+    return jsonify([{'ts': str(r[0]), 'cultivo': r[1], 'humedad': r[2], 'luz': r[3], 'bomba': r[4]} for r in rows])
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=443, ssl_context=('/app/certs/cert.pem', '/app/certs/key.pem'))
