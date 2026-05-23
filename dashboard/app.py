@@ -10,6 +10,7 @@ import secrets
 from functools import wraps
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
@@ -18,6 +19,7 @@ load_dotenv()
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '../.env'))
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecretkey")
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "supersecretjwtkey_Tefa2026_Secure!")
 
@@ -25,7 +27,7 @@ JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "supersecretjwtkey_Tefa2026_Secure!
 limiter = Limiter(
     key_func=get_remote_address,
     app=app,
-    default_limits=["200 per day", "50 per hour"],
+    default_limits=["1000 per day", "200 per hour"],
     storage_uri="memory://"
 )
 
@@ -272,7 +274,7 @@ def admin_required(f):
 
 
 @app.route("/", methods=["GET", "POST"])
-@limiter.limit("10 per hour")
+@limiter.limit("100 per hour")
 def login():
     token = request.cookies.get("access_token")
     if token:
