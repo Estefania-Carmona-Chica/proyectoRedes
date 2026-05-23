@@ -274,7 +274,7 @@ def admin_required(f):
 
 
 @app.route("/", methods=["GET", "POST"])
-@limiter.limit("100 per hour")
+@limiter.limit("6 per hour")
 def login():
     token = request.cookies.get("access_token")
     if token:
